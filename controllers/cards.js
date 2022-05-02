@@ -42,12 +42,12 @@ const likeCard = async (req, res) => {
       { $addToSet: { likes: req.user._id } },
       { new: true },
     );
-    if (!card) {
-      return res.status(404).send({ message: 'Передан несуществующий id карточки.' });
-    }
     return res.send(card);
   } catch (err) {
-    return res.status(500).res.send({ message: 'Ошибка по-умолчанию.' });
+    if (err.name === 'CastError') {
+      return res.status(404).send({ message: 'Передан несуществующий id карточки.' });
+    }
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
@@ -58,11 +58,11 @@ const dislikeCard = async (req, res) => {
       { $pull: { likes: req.user._id } },
       { new: true },
     );
-    if (!card) {
-      return res.status(404).send({ message: 'Передан несуществующий id карточки.' });
-    }
     return res.send(card);
   } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(404).send({ message: 'Передан несуществующий id карточки.' });
+    }
     return res.status(500).res.send({ message: 'Ошибка по-умолчанию.' });
   }
 };
