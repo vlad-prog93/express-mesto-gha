@@ -1,26 +1,20 @@
 module.exports = {
-  env: {
-    browser: true,
-    commonjs: true,
-    es2021: true,
-  },
-  globals: {
-    "_id": true,
-    "PORT": true
-  },
-  extends: [
-    'plugin:react/recommended',
-    'airbnb'
-  ],
-  parserOptions: {
-    ecmaFeatures: {
-      jsx: true,
-    },
-    ecmaVersion: 'latest',
-  },
-  plugins: [
-    'react',
-  ],
+  extends: 'airbnb-base',
   rules: {
+    'no-console': 'off',
+    'no-underscore-dangle': [
+      'error',
+      {
+        allow: [
+          '_id',
+        ],
+      },
+    ],
+    'no-control-regex': 0,
+    'no-useless-escape': 0,
+    'func-names': [
+      'error',
+      'never',
+    ],
   },
 };

@@ -1,88 +1,78 @@
 const User = require('../models/user');
 
-getUsers = async (req, res) => {
+const getUsers = async (req, res) => {
   try {
-    const users = await User.find({})
-    res.send({ users })
+    const users = await User.find({});
+    return res.send({ users });
   } catch (err) {
-    res.status(500).res.send({ 'message': 'Ошибка по-умолчанию.' })
-    return
+    return res.status(500).res.send({ message: 'Ошибка по-умолчанию.' });
   }
-}
+};
 
-getUser = async (req, res) => {
+const getUser = async (req, res) => {
   try {
-    const user = await User.findById(req.params.userId)
-    res.send(user)
+    const user = await User.findById(req.params.userId);
+    return res.send(user);
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(404).send({ 'message': `Пользователь по указанному id: ${req.params.userId} не найден.` })
-      return
+      return res.status(404).send({ message: `Пользователь по указанному id: ${req.params.userId} не найден.` });
     }
-    res.status(500).res.send({ 'message': 'Ошибка по-умолчанию.' })
-    return
+    return res.status(500).res.send({ message: 'Ошибка по-умолчанию.' });
   }
-}
+};
 
-createUser = async (req, res) => {
+const createUser = async (req, res) => {
   try {
-    const { name, about, avatar } = req.body
-    const user = await User.create({ name, about, avatar })
-    res.send(user)
+    const { name, about, avatar } = req.body;
+    const user = await User.create({ name, about, avatar });
+    return res.send(user);
   } catch (err) {
     if (err.name === 'ValidationError') {
-      res.status(400).send({ 'message': 'Переданы некорректные данные при создании пользователя.' })
-      return
+      res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+      return null;
     }
-    res.status(500).res.send({ 'message': 'Ошибка по-умолчанию.' })
-    return
+    return res.status(500).res.send({ message: 'Ошибка по-умолчанию.' });
   }
-}
+};
 
-updateUserInfo = async (req, res) => {
+const updateUserInfo = async (req, res) => {
   try {
-    const { name, about } = req.body
+    const { name, about } = req.body;
     if (!name || !about) {
-      res.status(400).send({ 'message': 'Переданы некорректные данные при обновлении данных пользователя.' })
-      return
+      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении данных пользователя.' });
     }
-    const id = req.user._id
-    const user = await User.findByIdAndUpdate(id, { name, about }, { new: true })
-    res.send(user)
+    const id = req.user._id;
+    const user = await User.findByIdAndUpdate(id, { name, about }, { new: true });
+    return res.send(user);
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(404).send({ 'message': `Пользователь по указанному id не найден.` })
-      return
+      return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
     }
-    res.status(500).res.send({ 'message': 'Ошибка по-умолчанию.' })
-    return
+    return res.status(500).res.send({ message: 'Ошибка по-умолчанию.' });
   }
-}
+};
 
-updateUserAvatar = async (req, res) => {
+const updateUserAvatar = async (req, res) => {
   try {
-    const { avatar } = req.body
+    const { avatar } = req.body;
     if (!avatar) {
-      res.status(400).send({ 'message': 'Переданы некорректные данные при обновлении аватара пользователя.' })
-      return
+      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара пользователя.' });
     }
-    const id = req.user._id
-    const user = await User.findByIdAndUpdate(id, { avatar }, { new: true })
-    res.send(user)
+    const id = req.user._id;
+    const user = await User.findByIdAndUpdate(id, { avatar }, { new: true });
+    return res.send(user);
   } catch (err) {
     if (err.name === 'CastError') {
-      res.status(404).send({ 'message': `Пользователь по указанному id не найден.` })
-      return
+      return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
     }
-    res.status(500).res.send({ 'message': 'Ошибка по-умолчанию.' })
-    return
+    return res.status(500).res.send({ message: 'Ошибка по-умолчанию.' });
   }
-}
+};
 
 module.exports = {
   getUsers,
   getUser,
   createUser,
   updateUserInfo,
-  updateUserAvatar
-}
+  updateUserAvatar,
+};
