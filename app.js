@@ -5,7 +5,7 @@ const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 const start = async () => {
   try {
@@ -22,8 +22,10 @@ const start = async () => {
     });
 
     app.use(cors());
+    app.get('/', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
     app.use('/users', routerUsers);
     app.use('/cards', routerCards);
+    app.get('/:some', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
 
     app.listen(PORT, () => {
       console.log(`Server has been started http://localhost:${PORT}`);
