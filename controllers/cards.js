@@ -26,7 +26,7 @@ const createCard = async (req, res) => {
   try {
     const { name, link } = req.body;
     const owner = req.user._id;
-    const card = await Card.create({ name, link, owner }, { runValidators: true });
+    const card = await Card.create({ name, link, owner });
     return res.send(card);
   } catch (err) {
     if (err.name === 'CastError' && err.value.length !== 22) {
