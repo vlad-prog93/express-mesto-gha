@@ -57,7 +57,7 @@ const updateUserAvatar = async (req, res, next) => {
   }
 };
 
-const handleErrors = (err, req, res) => {
+const handleErrors = (err, req, res, next) => {
   if (err.name === 'CastError' && err.kind === 'ObjectId' && err.value.length !== 22) {
     return res.status(400).send({ message: 'Введен некорректный id' });
   }

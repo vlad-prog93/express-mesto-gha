@@ -5,7 +5,7 @@ const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 
 const app = express();
-const PORT = process.env.PORT || 3001;
+const PORT = process.env.PORT || 3000;
 
 const start = async () => {
   try {
