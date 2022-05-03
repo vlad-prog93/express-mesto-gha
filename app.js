@@ -1,11 +1,10 @@
 const express = require('express');
 const mongoose = require('mongoose');
-const cors = require('cors');
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 3001;
 
 const start = async () => {
   try {
@@ -21,12 +20,9 @@ const start = async () => {
       next();
     });
 
-    app.use(cors());
     app.use('/users', routerUsers);
     app.use('/cards', routerCards);
-    app.get('/', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
-    app.get('/:some', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
-    app.patch('/:some', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
+    app.use((req, res) => res.status(404).send({ message: 'Страница не найдена' }));
 
     app.listen(PORT, () => {
       console.log(`Server has been started http://localhost:${PORT}`);

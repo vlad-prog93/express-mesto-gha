@@ -1,73 +1,73 @@
 const User = require('../models/user');
 
-const getUsers = async (req, res, next) => {
+const getUsers = async (req, res) => {
   try {
     const users = await User.find({});
     return res.send({ users });
   } catch (err) {
-    return next(err);
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
-const getUser = async (req, res, next) => {
+const getUser = async (req, res) => {
   try {
     const user = await User.findById(req.params.userId);
     if (!user) return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
     return res.send(user);
   } catch (err) {
-    return next(err);
+    if (err.name === 'CastError' && err.value.length !== 22) {
+      return res.status(400).send({ message: 'Введен некорректный id' });
+    }
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
-const createUser = async (req, res, next) => {
+const createUser = async (req, res) => {
   try {
     const { name, about, avatar } = req.body;
-    const user = await User.create({ name, about, avatar });
+    const user = await User.create({ name, about, avatar }, { runValidators: true });
     return res.send(user);
   } catch (err) {
-    return next(err);
+    if (err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+    }
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
-const updateUserInfo = async (req, res, next) => {
+const updateUserInfo = async (req, res) => {
   try {
     const { name, about } = req.body;
-    if (!name || !about) {
+    const id = req.user._id;
+    const user = await
+    User.findByIdAndUpdate(id, { name, about }, { runValidators: true, new: true });
+    return res.send(user);
+  } catch (err) {
+    if (err.name === 'CastError') {
+      return res.status(400).send({ message: 'Введен некорректный id' });
+    }
+    if (err.name === 'ValidationError') {
       return res.status(400).send({ message: 'Переданы некорректные данные при обновлении данных пользователя.' });
     }
-    const id = req.user._id;
-    const user = await User.findByIdAndUpdate(id, { name, about }, { new: true });
-    return res.send(user);
-  } catch (err) {
-    return next(err);
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
-const updateUserAvatar = async (req, res, next) => {
+const updateUserAvatar = async (req, res) => {
   try {
     const { avatar } = req.body;
-    if (!avatar) {
-      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара пользователя.' });
-    }
     const id = req.user._id;
-    const user = await User.findByIdAndUpdate(id, { avatar }, { new: true });
+    const user = await User.findByIdAndUpdate(id, { avatar }, { runValidators: true, new: true });
     return res.send(user);
   } catch (err) {
-    return next(err);
+    if (err.name === 'CastError') {
+      return res.status(400).send({ message: 'Введен некорректный id' });
+    }
+    if (err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара пользователя.' });
+    }
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
-};
-
-const handleErrors = (err, req, res, next) => {
-  if (err.name === 'CastError' && err.kind === 'ObjectId' && err.value.length !== 22) {
-    return res.status(400).send({ message: 'Введен некорректный id' });
-  }
-  if (err.name === 'ValidationError') {
-    return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
-  }
-  if (!err) {
-    return next();
-  }
-  return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
 };
 
 module.exports = {
@@ -76,5 +76,4 @@ module.exports = {
   createUser,
   updateUserInfo,
   updateUserAvatar,
-  handleErrors,
 };

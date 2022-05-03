@@ -1,37 +1,45 @@
 const Card = require('../models/card');
 
-const getCards = async (req, res, next) => {
+const getCards = async (req, res) => {
   try {
     const cards = await Card.find({});
     return res.send({ cards });
   } catch (err) {
-    return next(err);
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
-const deleteCard = async (req, res, next) => {
+const deleteCard = async (req, res) => {
   try {
     const card = await Card.findByIdAndRemove(req.params.cardId);
     if (!card) return res.status(404).send({ message: 'Карточка по указанному id не найдена.' });
     return res.send(req.params);
   } catch (err) {
-    return next(err);
+    if (err.name === 'CastError') {
+      return res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
+    }
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
-const createCard = async (req, res, next) => {
+const createCard = async (req, res) => {
   try {
     const { name, link } = req.body;
-    if (!name || !link) return res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
     const owner = req.user._id;
-    const card = await Card.create({ name, link, owner });
+    const card = await Card.create({ name, link, owner }, { runValidators: true });
     return res.send(card);
   } catch (err) {
-    return next(err);
+    if (err.name === 'CastError' && err.value.length !== 22) {
+      return res.status(400).send({ message: 'Введен некорректный id' });
+    }
+    if (err.name === 'ValidationError') {
+      return res.status(400).send({ message: 'Переданы некорректные данные при создании карточки.' });
+    }
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
-const likeCard = async (req, res, next) => {
+const likeCard = async (req, res) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -41,11 +49,14 @@ const likeCard = async (req, res, next) => {
     if (!card) return res.status(404).send({ message: 'Карточка по указанному id не найдена.' });
     return res.send(card);
   } catch (err) {
-    return next(err);
+    if (err.name === 'CastError' && err.value.length !== 22) {
+      return res.status(400).send({ message: 'Введен некорректный id' });
+    }
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
 };
 
-const dislikeCard = async (req, res, next) => {
+const dislikeCard = async (req, res) => {
   try {
     const card = await Card.findByIdAndUpdate(
       req.params.cardId,
@@ -55,21 +66,11 @@ const dislikeCard = async (req, res, next) => {
     if (!card) return res.status(404).send({ message: 'Карточка по указанному id не найдена.' });
     return res.send(card);
   } catch (err) {
-    return next(err);
+    if (err.name === 'CastError' && err.value.length !== 22) {
+      return res.status(400).send({ message: 'Введен некорректный id' });
+    }
+    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
   }
-};
-
-const handleErrors = (err, req, res, next) => {
-  if (err.name === 'CastError' && err.kind === 'ObjectId' && err.value.length !== 22) {
-    return res.status(400).send({ message: 'Введен некорректный id' });
-  }
-  if (err.name === 'ValidationError') {
-    return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
-  }
-  if (!err) {
-    return next();
-  }
-  return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
 };
 
 module.exports = {
@@ -78,5 +79,4 @@ module.exports = {
   createCard,
   likeCard,
   dislikeCard,
-  handleErrors,
 };
