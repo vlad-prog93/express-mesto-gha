@@ -22,10 +22,11 @@ const start = async () => {
     });
 
     app.use(cors());
-    app.get('/', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
     app.use('/users', routerUsers);
     app.use('/cards', routerCards);
+    app.get('/', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
     app.get('/:some', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
+    app.patch('/:some', (req, res) => res.status(404).send({ message: 'Такой страницы нет' }));
 
     app.listen(PORT, () => {
       console.log(`Server has been started http://localhost:${PORT}`);
