@@ -19,7 +19,7 @@ const deleteCard = async (req, res, next) => {
       return;
     }
     if (!(card.owner == req.user._id)) {
-      next(ApiErrors.BadRequest('Переданы некорректные данные'));
+      next(new ApiErrors(403, 'Нельзя удалать чужую карточку'));
       return;
     }
     await Card.findByIdAndRemove(req.params.cardId);
