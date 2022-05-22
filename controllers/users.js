@@ -28,6 +28,18 @@ const getUser = async (req, res, next) => {
   }
 };
 
+const getUserById = async (req, res, next) => {
+  try {
+    const user = await User.findById(req.params.userId);
+    if (!user) {
+      next(ApiErrors.NotFound('Пользователь по указанному id не найден.'));
+    }
+    res.send(user);
+  } catch (err) {
+    next(err);
+  }
+};
+
 const createUser = async (req, res, next) => {
   try {
     const {
@@ -92,7 +104,7 @@ const login = async (req, res, next) => {
     maxAge: 3600000 * 24 * 7,
     httpOnly: true,
   })
-    .end();
+    .send({ message: 'Вы успешно авторизованы' });
 };
 
 module.exports = {
@@ -102,4 +114,5 @@ module.exports = {
   updateUserInfo,
   updateUserAvatar,
   login,
+  getUserById,
 };

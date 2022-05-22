@@ -12,10 +12,10 @@ const auth = async (req, res, next) => {
       };
       next();
     } else {
-      next(new ApiErrors(403, 'У  вас нет доступа'));
+      next(ApiErrors.Unauthorized('У  вас нет доступа'));
     }
   } catch (err) {
-    next(new ApiErrors(403, 'У  вас нет доступа'));
+    next(ApiErrors.Unauthorized('У  вас нет доступа'));
   }
 };
 
