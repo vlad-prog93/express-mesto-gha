@@ -1,8 +1,8 @@
 const express = require('express');
 const {
   validationUpdateUserInfo,
-  validationUpdateUserAvatar
- } = require('../middlewares/validation')
+  validationUpdateUserAvatar,
+} = require('../middlewares/validation');
 
 const {
   getUsers,

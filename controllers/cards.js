@@ -4,10 +4,10 @@ const ApiErrors = require('../utils/apiErrors');
 const getCards = async (req, res, next) => {
   try {
     const cards = await Card.find({});
-    return res.send({ cards });
+    res.send({ cards });
+    return;
   } catch (err) {
     next(err);
-    return;
   }
 };
 
@@ -23,14 +23,14 @@ const deleteCard = async (req, res, next) => {
       return;
     }
     await Card.findByIdAndRemove(req.params.cardId);
-    return res.send(req.params);
+    res.send(req.params);
+    return;
   } catch (err) {
     if (err.name === 'CastError') {
       next(ApiErrors.BadRequest('Переданы некорректные данные'));
       return;
     }
     next(err);
-    return;
   }
 };
 
@@ -39,10 +39,10 @@ const createCard = async (req, res, next) => {
     const { name, link } = req.body;
     const owner = req.user._id;
     const card = await Card.create({ name, link, owner });
-    return res.send(card);
+    res.send(card);
+    return;
   } catch (err) {
     next(err);
-    return;
   }
 };
 
@@ -57,10 +57,10 @@ const likeCard = async (req, res, next) => {
       next(ApiErrors.NotFound('Карточка по указанному id не найдена.'));
       return;
     }
-    return res.send(card);
+    res.send(card);
+    return;
   } catch (err) {
     next(err);
-    return;
   }
 };
 
@@ -75,10 +75,10 @@ const dislikeCard = async (req, res, next) => {
       next(ApiErrors.NotFound('Карточка по указанному id не найдена.'));
       return;
     }
-    return res.send(card);
+    res.send(card);
+    return;
   } catch (err) {
     next(ApiErrors.Internal(err));
-    return;
   }
 };
 
