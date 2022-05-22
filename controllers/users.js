@@ -1,41 +1,59 @@
 const User = require('../models/user');
+const bcrypt = require('bcrypt');
+const jwt = require('jsonwebtoken');
+const ApiErrors = require('../utils/apiErrors');
 
-const getUsers = async (req, res) => {
+const DUBLICATE_MONGOOSE_ERROR_CODE = 11000;
+const SOLT_ROUND = 10;
+const SECRET_KEY = 'HELLObro';
+
+const getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
     return res.send({ users });
   } catch (err) {
-    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
+    next(err);
+    return;
   }
 };
 
-const getUser = async (req, res) => {
+const getUser = async (req, res, next) => {
   try {
-    const user = await User.findById(req.params.userId);
-    if (!user) return res.status(404).send({ message: 'Пользователь по указанному id не найден.' });
+    const user = await User.findById(req.user._id);
+    if (!user) {
+      next(ApiErrors.NotFound('Пользователь по указанному id не найден.'));
+      return;
+    }
     return res.send(user);
   } catch (err) {
-    if (err.name === 'CastError' && err.value.length !== 22) {
-      return res.status(400).send({ message: 'Введен некорректный id' });
-    }
-    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
+    next(err)
+    return;
   }
 };
 
-const createUser = async (req, res) => {
+const createUser = async (req, res, next) => {
   try {
-    const { name, about, avatar } = req.body;
-    const user = await User.create({ name, about, avatar });
-    return res.send(user);
-  } catch (err) {
-    if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Переданы некорректные данные при создании пользователя.' });
+    const { email, password, name, about, avatar } = req.body;
+    if (!email || !password) {
+      next(ApiErrors.BadRequest('Неправильные логин или пароль'));
+      return;
     }
-    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
+    const hashPassword = await bcrypt.hash(password, SOLT_ROUND);
+    let user = await User.create({ email, password: hashPassword, name, about, avatar });
+    user = user.toObject()
+    delete user.password
+    return res.status(201).send(user);
+  } catch (err) {
+    if (err.code === DUBLICATE_MONGOOSE_ERROR_CODE) {
+      next(ApiErrors.Conflict('Пользователь уже существует'));
+      return;
+    }
+    next(err);
+    return;
   }
 };
 
-const updateUserInfo = async (req, res) => {
+const updateUserInfo = async (req, res, next) => {
   try {
     const { name, about } = req.body;
     const id = req.user._id;
@@ -43,32 +61,46 @@ const updateUserInfo = async (req, res) => {
     User.findByIdAndUpdate(id, { name, about }, { runValidators: true, new: true });
     return res.send(user);
   } catch (err) {
-    if (err.name === 'CastError') {
-      return res.status(400).send({ message: 'Введен некорректный id' });
-    }
-    if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении данных пользователя.' });
-    }
-    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
+    next(err);
+    return;
   }
 };
 
-const updateUserAvatar = async (req, res) => {
+const updateUserAvatar = async (req, res, next) => {
   try {
     const { avatar } = req.body;
     const id = req.user._id;
     const user = await User.findByIdAndUpdate(id, { avatar }, { runValidators: true, new: true });
     return res.send(user);
   } catch (err) {
-    if (err.name === 'CastError') {
-      return res.status(400).send({ message: 'Введен некорректный id' });
-    }
-    if (err.name === 'ValidationError') {
-      return res.status(400).send({ message: 'Переданы некорректные данные при обновлении аватара пользователя.' });
-    }
-    return res.status(500).send({ message: 'Ошибка по-умолчанию.' });
+    next(err);
+    return;
   }
 };
+
+const login = async (req, res, next) => {
+  const { email, password } = req.body;
+  if (!email || !password) {
+    next(ApiErrors.Unauthorized('Неправильные логин или пароль'));
+    return;
+  }
+  const user = await User.findOne({ email }).select('+password');
+  if (!user) {
+    next(ApiErrors.Unauthorized('Неправильные логин или пароль'));
+    return;
+  }
+  const isValidPassword = await bcrypt.compare(password, user.password);
+  if (!isValidPassword) {
+    next(ApiErrors.Unauthorized('Неправильные логин или пароль'));
+    return;
+  }
+  token = jwt.sign({user: user._id}, SECRET_KEY, { expiresIn: '7d' });
+  res.cookie('jwt', token, {
+    maxAge: 3600000 * 24 * 7,
+    httpOnly: true
+  })
+  .end();
+}
 
 module.exports = {
   getUsers,
@@ -76,4 +108,5 @@ module.exports = {
   createUser,
   updateUserInfo,
   updateUserAvatar,
+  login
 };
