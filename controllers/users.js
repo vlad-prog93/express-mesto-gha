@@ -99,12 +99,12 @@ const login = async (req, res, next) => {
   if (!isValidPassword) {
     next(ApiErrors.Unauthorized('Неправильные логин или пароль'));
   }
-  const token = jwt.sign({ user: user._id }, SECRET_KEY, { expiresIn: '7d' });
+  const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
   res.cookie('jwt', token, {
     maxAge: 3600000 * 24 * 7,
     httpOnly: true,
   })
-    .send({ message: 'Вы успешно авторизованы' });
+    .send({ _id: token });
 };
 
 module.exports = {
