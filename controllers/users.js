@@ -69,7 +69,7 @@ const updateUserInfo = async (req, res, next) => {
     const id = req.user._id;
     const user = await
     User.findByIdAndUpdate(id, { name, about }, { runValidators: true, new: true });
-    res.send(user);
+    res.send({ data: user });
   } catch (err) {
     next(err);
   }
@@ -80,7 +80,7 @@ const updateUserAvatar = async (req, res, next) => {
     const { avatar } = req.body;
     const id = req.user._id;
     const user = await User.findByIdAndUpdate(id, { avatar }, { runValidators: true, new: true });
-    res.send(user);
+    res.send({ data: user });
   } catch (err) {
     next(err);
   }
