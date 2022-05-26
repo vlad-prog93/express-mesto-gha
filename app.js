@@ -1,12 +1,14 @@
 const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
+const cookieParser = require('cookie-parser');
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
 const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 const { validationSignIn, validationSignUp } = require('./middlewares/validation');
+const ApiErrors = require('./utils/apiErrors');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -18,13 +20,14 @@ const start = async () => {
       useUnifiedTopology: false,
     });
     app.use(express.json());
+    app.use(cookieParser());
 
     app.post('/signin', validationSignIn, login);
     app.post('/signup', validationSignUp, createUser);
     app.use(auth);
     app.use('/users', routerUsers);
     app.use('/cards', routerCards);
-    app.use((req, res) => res.status(404).send({ message: 'Страница не найдена' }));
+    app.use((req, res, next) => next(ApiErrors.NotFound('Страница не найдена')));
 
     app.use(errors());
     app.use(errorHandler);

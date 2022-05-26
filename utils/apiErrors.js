@@ -1,7 +1,7 @@
-class ApiErrors {
+class ApiErrors extends Error {
   constructor(code, message) {
+    super(message);
     this.code = code;
-    this.message = message;
   }
 
   static BadRequest(msg) {
@@ -18,6 +18,10 @@ class ApiErrors {
 
   static Conflict(msg) {
     return new ApiErrors(409, msg);
+  }
+
+  static Internal(msg) {
+    return new ApiErrors(500, msg);
   }
 }
 

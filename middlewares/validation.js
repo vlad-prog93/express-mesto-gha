@@ -6,17 +6,17 @@ const validationSignIn = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
     password: Joi.string().required().min(8),
-  }).unknown(true),
+  }),
 });
 
 const validationSignUp = celebrate({
   body: Joi.object().keys({
     email: Joi.string().required().email(),
-    password: Joi.string().required().min(8),
+    password: Joi.string().required(),
     name: Joi.string().min(2).max(30),
     about: Joi.string().min(2).max(30),
     avatar: Joi.string().pattern(PATTERN_URL),
-  }).unknown(true),
+  }),
 });
 
 const validationUpdateUserInfo = celebrate({
@@ -28,7 +28,7 @@ const validationUpdateUserInfo = celebrate({
 
 const validationUpdateUserAvatar = celebrate({
   body: Joi.object().keys({
-    avatar: Joi.string().pattern(PATTERN_URL),
+    avatar: Joi.string().required().pattern(PATTERN_URL),
   }),
 });
 
@@ -37,7 +37,7 @@ const validationCreateCard = celebrate({
     name: Joi.string().required().min(2).max(30),
     link: Joi.string().required().min(2).max(30)
       .pattern(PATTERN_URL),
-  }).unknown(true),
+  }),
 });
 
 const validationChangeStateCard = celebrate({

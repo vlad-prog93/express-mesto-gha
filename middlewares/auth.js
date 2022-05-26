@@ -4,7 +4,7 @@ const ApiErrors = require('../utils/apiErrors');
 const SECRET_KEY = 'HELLObro';
 const auth = async (req, res, next) => {
   try {
-    const token = req.headers.cookie.split('=')[1];
+    const token = req.cookies.jwt;
     const decoded = jwt.verify(token, SECRET_KEY);
     if (decoded) {
       req.user = {

@@ -1,10 +1,14 @@
 const { Schema, model } = require('mongoose');
+const validator = require('validator');
 
 const PATTETN_LINK = /https?:\/\/(www\.)?[-a-zA-Z0-9@:%+~#=]{1,256}\.[a-zA-Z0-9()]{1,6}\b([-a-zA-Z0-9()@:%+.~#?&//=]*)/;
 
 const userSchema = new Schema({
   email: {
     type: String,
+    validate: {
+      validator: (v) => validator.isEmail(v),
+    },
     unique: true,
     required: true,
   },

@@ -1,23 +1,10 @@
-const ApiErrors = require('../utils/apiErrors');
-
 const errorHandler = (err, req, res, next) => {
-  if (err instanceof ApiErrors) {
-    res.status(err.code).send({ message: err.message });
-    return;
-  }
+  const statusCode = err.code || 500;
 
-  if (err.name === 'CastError') {
-    res.status(400).send({ message: 'Введен некорректный id' });
-    return;
-  }
+  const message = statusCode === 500 ? 'Ошибка по-умолчанию.': err.message
+  res.status(statusCode).send({ message });
 
-  if (err.name === 'ValidationError') {
-    res.status(400).send({ message: 'Переданы некорректные данные' });
-    return;
-  }
-
-  res.status(500).send({ message: 'Ошибка по-умолчанию.' });
-  next(err);
+  next();
 };
 
 module.exports = errorHandler;
