@@ -9,6 +9,7 @@ const auth = require('./middlewares/auth');
 const errorHandler = require('./middlewares/errorHandler');
 const { validationSignIn, validationSignUp } = require('./middlewares/validation');
 const ApiErrors = require('./utils/apiErrors');
+const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
@@ -21,14 +22,14 @@ const start = async () => {
     });
     app.use(express.json());
     app.use(cookieParser());
-
+    app.use(requestLogger);
     app.post('/signin', validationSignIn, login);
     app.post('/signup', validationSignUp, createUser);
     app.use(auth);
     app.use('/users', routerUsers);
     app.use('/cards', routerCards);
     app.use((req, res, next) => next(ApiErrors.NotFound('Страница не найдена')));
-
+    app.use(errorLogger);
     app.use(errors());
     app.use(errorHandler);
 
