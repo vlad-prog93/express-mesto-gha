@@ -10,7 +10,7 @@ const SECRET_KEY = 'HELLObro';
 const getUsers = async (req, res, next) => {
   try {
     const users = await User.find({});
-    return res.send({ users });
+    return res.send({ ...users });
   } catch (err) {
     return next(ApiErrors.Internal('Ошибка по-умолчанию.'));
   }
@@ -75,7 +75,7 @@ const updateUserInfo = async (req, res, next) => {
     const id = req.user._id;
     const user = await
     User.findByIdAndUpdate(id, { name, about }, { runValidators: true, new: true });
-    return res.send({ data: user });
+    return res.send(user);
   } catch (err) {
     if (err.name === 'CastError') {
       return next(ApiErrors.BadRequest('Введен некорректный id'));
@@ -92,7 +92,7 @@ const updateUserAvatar = async (req, res, next) => {
     const { avatar } = req.body;
     const id = req.user._id;
     const user = await User.findByIdAndUpdate(id, { avatar }, { runValidators: true, new: true });
-    return res.send({ data: user });
+    return res.send(user);
   } catch (err) {
     if (err.name === 'CastError') {
       return next(ApiErrors.BadRequest('Введен некорректный id'));
@@ -118,11 +118,7 @@ const login = async (req, res, next) => {
     return next(ApiErrors.Unauthorized('Неправильные логин или пароль'));
   }
   const token = jwt.sign({ _id: user._id }, SECRET_KEY, { expiresIn: '7d' });
-  return res.cookie('jwt', token, {
-    maxAge: 3600000 * 24 * 7,
-    httpOnly: true,
-  })
-    .send({ _id: token });
+  return res.send({ token });
 };
 
 module.exports = {

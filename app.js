@@ -2,6 +2,7 @@ const express = require('express');
 const mongoose = require('mongoose');
 const { errors } = require('celebrate');
 const cookieParser = require('cookie-parser');
+const cors = require('cors');
 const routerUsers = require('./routes/users');
 const routerCards = require('./routes/cards');
 const { login, createUser } = require('./controllers/users');
@@ -12,7 +13,7 @@ const ApiErrors = require('./utils/apiErrors');
 const { requestLogger, errorLogger } = require('./middlewares/logger');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 5000;
 
 const start = async () => {
   try {
@@ -23,6 +24,7 @@ const start = async () => {
     app.use(express.json());
     app.use(cookieParser());
     app.use(requestLogger);
+    app.use(cors({ origin: 'http://localhost:3000', credentials: true }));
     app.post('/signin', validationSignIn, login);
     app.post('/signup', validationSignUp, createUser);
     app.use(auth);
